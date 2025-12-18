@@ -129,6 +129,7 @@
 @theme {
 	/* Colors */
 	--color-pt-light: #6d1010;
+	--color-pt-lighter: #8a2020;
 	--color-pt-dark: #500e0e;
 	--color-bp-lighter: #344b6a;
 	--color-bp-dark: #0e305b;
@@ -143,14 +144,14 @@
 	/* Fonts */
 	--font-sans: 'Phantom Sans', 'Poppins', sans-serif;
 	--font-content: 'Phantom Sans', 'Poppins', sans-serif;
-	--font-rc: 'R&C Basic', 'Poppins', sans-serif;
+	--font-rc-basic: 'R&C Basic', 'Poppins', sans-serif;
 	--font-rc-empty: 'R&C Basic Empty', 'Poppins', sans-serif;
 	--font-rc-dark: 'R&C Basic Dark', 'Poppins', sans-serif;
-	--font-rc-full: 'R&C Basic Full', 'Poppins', sans-serif;
-	--font-rcgl: 'R&C Guidelines', 'Poppins', sans-serif;
+	--font-rc: 'R&C Basic Full', 'Poppins', sans-serif;
+	--font-rcgl-basic: 'R&C Guidelines', 'Poppins', sans-serif;
 	--font-rcgl-empty: 'R&C Guidelines Empty', 'Poppins', sans-serif;
 	--font-rcgl-dark: 'R&C Guidelines Dark', 'Poppins', sans-serif;
-	--font-rcgl-full: 'R&C Guidelines Full', 'Poppins', sans-serif;
+	--font-rcgl: 'R&C Guidelines Full', 'Poppins', sans-serif;
 }
 
 :root {
@@ -164,7 +165,7 @@
 	h4,
 	h5,
 	h6 {
-		@apply font-rc-full;
+		@apply font-rc;
 	}
 }
 
@@ -173,7 +174,9 @@
 		linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
 		linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 	background-size: 50px 50px;
-	background-position: 0 0, 0 0;
+	background-position:
+		0 0,
+		0 0;
 	position: relative;
 }
 
@@ -244,7 +247,7 @@
 
 @layer components {
 	.btn {
-		@apply inline-flex items-center justify-center gap-2 text-xl py-2 px-6 motion-safe:transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-rc-full;
+		@apply inline-flex items-center justify-center gap-2 text-xl py-2 px-6 motion-safe:transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-rc;
 	}
 
 	.btn-primary {
@@ -331,7 +334,7 @@
 	h4,
 	h5,
 	h6 {
-		@apply font-rc-full text-white;
+		@apply font-rc text-white;
 	}
 	h1 {
 		@apply mt-10 mb-4 pb-2 text-5xl leading-tight tracking-tight border-b border-white/50 print:mt-4 print:mb-2 print:pb-1 print:border-black/20;
