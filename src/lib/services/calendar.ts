@@ -1,10 +1,20 @@
 import { google, type calendar_v3 } from 'googleapis';
-import { GOOGLE_CALENDAR_API_KEY, GOOGLE_CALENDAR_ID } from '$env/static/private';
+import {
+	GOOGLE_CALENDAR_ID,
+	GOOGLE_SERVICE_ACCOUNT_EMAIL,
+	GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
+} from '$env/static/private';
 import type { CalendarEvent } from '$lib/types/calendar';
+
+const auth = new google.auth.JWT({
+	email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
+	key: GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.replace(/\\n/g, '\n'),
+	scopes: ['https://www.googleapis.com/auth/calendar.readonly']
+});
 
 const calendar = google.calendar({
 	version: 'v3',
-	auth: GOOGLE_CALENDAR_API_KEY
+	auth
 });
 
 const COLOR_MAP: Record<string, string> = {
@@ -56,5 +66,6 @@ export async function getEvents(options: GetEventsOptions = {}): Promise<Calenda
 		orderBy: 'startTime'
 	});
 
+	console.log('Raw events:', JSON.stringify(response.data.items, null, 2));
 	return (response.data.items ?? []).map(transformEvent);
 }

@@ -231,6 +231,19 @@ export function getEventDurationHours(event: CalendarEvent): number {
 	return Math.round(getEventDuration(event) / (1000 * 60 * 60));
 }
 
+function formatTime(date: Date, includeAmPm: boolean): string {
+	const hour = date.getHours();
+	const minute = date.getMinutes();
+	const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+	const amPm = hour < 12 ? 'AM' : 'PM';
+
+	if (minute === 0) {
+		return includeAmPm ? `${hour12} ${amPm}` : `${hour12}`;
+	}
+	const minuteStr = minute.toString().padStart(2, '0');
+	return includeAmPm ? `${hour12}:${minuteStr} ${amPm}` : `${hour12}:${minuteStr}`;
+}
+
 export function formatEventTime(event: CalendarEvent): string {
 	if (event.isAllDay) {
 		return 'All day';
@@ -239,13 +252,14 @@ export function formatEventTime(event: CalendarEvent): string {
 	const start = new Date(event.start);
 	const end = new Date(event.end);
 
-	const timeFormat: Intl.DateTimeFormatOptions = {
-		hour: 'numeric',
-		minute: '2-digit',
-		hour12: true
-	};
+	const startIsAm = start.getHours() < 12;
+	const endIsAm = end.getHours() < 12;
+	const sameAmPm = startIsAm === endIsAm;
 
-	return `${start.toLocaleTimeString('en-US', timeFormat)} - ${end.toLocaleTimeString('en-US', timeFormat)}`;
+	const startStr = formatTime(start, !sameAmPm);
+	const endStr = formatTime(end, true);
+
+	return `${startStr} - ${endStr}`;
 }
 
 export function formatEventDate(event: CalendarEvent): string {
@@ -274,6 +288,95 @@ export function groupEventsByDate(events: CalendarEvent[]): Map<string, Calendar
 export function getEventsForDate(events: CalendarEvent[], date: Date): CalendarEvent[] {
 	const targetDate = date.toDateString();
 	return events.filter((event) => new Date(event.start).toDateString() === targetDate);
+}
+
+export interface EventWithColumn {
+	event: CalendarEvent;
+	column: number;
+	totalColumns: number;
+}
+
+function eventsOverlap(a: CalendarEvent, b: CalendarEvent): boolean {
+	const aStart = new Date(a.start).getTime();
+	const aEnd = new Date(a.end).getTime();
+	const bStart = new Date(b.start).getTime();
+	const bEnd = new Date(b.end).getTime();
+	return aStart < bEnd && bStart < aEnd;
+}
+
+export function assignEventColumns(events: CalendarEvent[]): EventWithColumn[] {
+	if (events.length === 0) return [];
+
+	const sorted = [...events].sort(
+		(a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+	);
+
+	const groups: CalendarEvent[][] = [];
+
+	for (const event of sorted) {
+		let placed = false;
+		for (const group of groups) {
+			if (group.some((e) => eventsOverlap(e, event))) {
+				group.push(event);
+				placed = true;
+				break;
+			}
+		}
+		if (!placed) {
+			groups.push([event]);
+		}
+	}
+
+	const mergedGroups: CalendarEvent[][] = [];
+	for (const group of groups) {
+		let merged = false;
+		for (const mergedGroup of mergedGroups) {
+			if (group.some((e) => mergedGroup.some((me) => eventsOverlap(e, me)))) {
+				mergedGroup.push(...group);
+				merged = true;
+				break;
+			}
+		}
+		if (!merged) {
+			mergedGroups.push([...group]);
+		}
+	}
+
+	const result: EventWithColumn[] = [];
+
+	for (const group of mergedGroups) {
+		const columns: CalendarEvent[][] = [];
+
+		const groupSorted = [...group].sort(
+			(a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+		);
+
+		for (const event of groupSorted) {
+			let placed = false;
+			for (let col = 0; col < columns.length; col++) {
+				const canPlace = columns[col].every((e) => !eventsOverlap(e, event));
+				if (canPlace) {
+					columns[col].push(event);
+					result.push({ event, column: col, totalColumns: 0 });
+					placed = true;
+					break;
+				}
+			}
+			if (!placed) {
+				columns.push([event]);
+				result.push({ event, column: columns.length - 1, totalColumns: 0 });
+			}
+		}
+
+		const totalColumns = columns.length;
+		for (const item of result) {
+			if (group.some((e) => e.id === item.event.id)) {
+				item.totalColumns = totalColumns;
+			}
+		}
+	}
+
+	return result;
 }
 
 export function getNextEvent(events: CalendarEvent[]): CalendarEvent | null {

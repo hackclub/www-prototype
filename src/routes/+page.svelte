@@ -34,6 +34,9 @@
 	</div>
 	<div class="w-full flex flex-col space-y-2">
 		<Calendar />
-		<p>Events shown in time zone: {CALENDAR_TIMEZONE_DISPLAY}</p>
+		<div class="items-center lg:flex lg:justify-between flex-col lg:flex-row">
+			<p>Events shown in time zone: {CALENDAR_TIMEZONE_DISPLAY}</p>
+			<p>Click on an event to see more details</p>
+		</div>
 	</div>
 </div>
