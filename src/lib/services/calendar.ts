@@ -8,7 +8,7 @@ import type { CalendarEvent } from '$lib/types/calendar';
 
 const auth = new google.auth.JWT({
 	email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
-	key: GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.replace(/\\n/g, '\n'),
+	key: Buffer.from(GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY, 'base64').toString('utf-8'),
 	scopes: ['https://www.googleapis.com/auth/calendar.readonly']
 });
 
